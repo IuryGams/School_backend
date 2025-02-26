@@ -115,7 +115,7 @@ model Tuition {
   parentId  Int // Relacionamento com Parent
   parent    Parent   @relation(fields: [parentId], references: [id])
   amount    Float // Valor da mensalidade
-  dueDate   DateTime // Data de vencimento
+  dueDate   PaymentDates @default(TENTH)
   paid      Boolean  @default(false) // Status de pagamento
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -127,4 +127,11 @@ enum Roles {
   TEACHER
   STUDENT
   PARENT
+}
+
+enum PaymentDates {
+  FIVE
+  TENTH
+  FIFTEENTH
+  TWENTIETH
 }

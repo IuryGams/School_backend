@@ -81,3 +81,5 @@ class SubjectServices extends Services<"subject"> {
         })
     }
 }
+
+export {SubjectServices}
