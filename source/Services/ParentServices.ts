@@ -16,21 +16,37 @@ class ParentServices extends Services<"parent"> {
         super("parent");
     }
 
-    public async createParent(parent: ParentUser): Promise<User> {
-        const newParent = await this.userServices.createUser(
-            {
-                name: parent.name,
-                email: parent.email,
-                password: parent.password,
-                role: "PARENT",
-                parent: {
-                    create: {}
-                }
+    public async createParent(parent: ParentUser, tx?: Prisma.TransactionClient): Promise<User> {
+
+        const newParent = await this.userServices.createUser({
+            name: parent.name,
+            email: parent.email,
+            password: parent.password,
+            role: "PARENT",
+            parent: {
+                create: {}
             }
-        );
+        }, tx);
 
         return newParent;
     }
+
+    public async createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply> {
+        const { parent, students } = parentStudent;
+
+        return this.createwithTransactions(async (tx) => {
+
+            const newParent: User = await this.createParent(parent, tx);
+
+            const createdStudents: User[] = await this.studentServices.createStudents(students, newParent.id, tx);
+
+            return {
+                parent: newParent,
+                students: createdStudents
+            }
+        })
+    }
+
 
     // public async createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply> {
 
@@ -46,49 +62,6 @@ class ParentServices extends Services<"parent"> {
     //     }
     // }
 
-    public async createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply> {
-        const { parent, students } = parentStudent;
-
-        return this.withTransactions(async (prisma) => {
-
-            const newParent = await prisma.user.create({
-                data: {
-                    name: parent.name,
-                    email: parent.email,
-                    password: parent.password,
-                    role: "PARENT",
-                    parent: {
-                        create: {}
-                    }
-                }
-            });
-
-            const createdStudents = await Promise.all(
-                students.map(async student => {
-                    return await prisma.user.create({
-                        data: {
-                            name: student.name,
-                            email: student.email,
-                            password: student.password,
-                            role: "STUDENT",
-                            student: {
-                                create: {
-                                    parentId: newParent.id,
-                                    accessCode: Math.floor(1000 + Math.random() * 9000).toString()
-                                }
-                            }
-                        }
-                    });
-                })
-            );
-
-            return {
-                parent: newParent,
-                students: createdStudents
-            }
-        })
-    }
-    
 }
 
 export default ParentServices;

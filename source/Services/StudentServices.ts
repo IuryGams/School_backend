@@ -4,11 +4,14 @@ import { TOKENS } from "../Constants/tokensDI";
 import { StudentUser } from "../Types/user";
 import { NestedStudentData } from "../Types/nested_datas";
 import { Prisma, User } from "@prisma/client";
+import { Services } from ".";
 
 @injectable()
-class StudentServices implements IStudentServices {
+class StudentServices extends Services<"student"> implements IStudentServices {
 
-    constructor(@inject(TOKENS.UserServices) private userServices: IUserServices) { }
+    constructor(@inject(TOKENS.UserServices) private userServices: IUserServices) {
+        super("student");
+     }
 
     // Private Methods
     private createAccessCode() {
@@ -16,7 +19,7 @@ class StudentServices implements IStudentServices {
     }
 
     // Public Methods
-    public async createStudent(student: Omit<StudentUser, "role">, parent_id: number): Promise<User> {
+    public async createStudent(student: Omit<StudentUser, "role">, parent_id: number, tx?: Prisma.TransactionClient): Promise<User> {
         const accessCode = this.createAccessCode();
 
         const newStudent: User = await this.userServices.createUser({
@@ -31,9 +34,14 @@ class StudentServices implements IStudentServices {
                     isActive: true
                 }
             }
-        });
+        }, tx);
 
         return newStudent;
+    }
+
+    // TODO Refactor this method
+    public async createStudents(students: Omit<StudentUser, "role">[], parent_id: number, tx?: Prisma.TransactionClient): Promise<User[]> {
+        return Promise.all(students.map(async student => await this.createStudent(student, parent_id, tx)));
     }
 }
 
