@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // ou "mysql", "sqlite", etc.
+  url      = env("DATABASE_URL") // URL do banco de dados
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Roles // "admin", "teacher", "student", "parent", "coordinator"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  teacher Teacher?
+  student Student?
+  parent  Parent?
+  address Address[]
+}
+
+model Address {
+  id           Int      @id @default(autoincrement())
+  street       String // Nome da rua
+  number       String? // Número do endereço
+  complement   String? // Complemento (opcional)
+  neighborhood String // Bairro
+  city         String // Cidade
+  state        String // Estado
+  CEP          String // CEP
+  country      String   @default("Brasil") // País (padrão: Brasil)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacionamentos (opcionais)
+  userId Int? // Relacionamento com User (opcional)
+  user   User? @relation(fields: [userId], references: [id])
+}
+
+model Teacher {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id])
+  subjects  Subject[]
+  classes   Class[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @unique
+  user        User         @relation(fields: [userId], references: [id])
+  parentId    Int
+  parent      Parent       @relation(fields: [parentId], references: [id])
+  accessCode  String       @unique 
+  enrollments Enrollment[]
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Parent {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @unique
+  user      User      @relation(fields: [userId], references: [id])
+  students  Student[]
+  tuitions  Tuition[] // Relacionamento com Tuition
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Subject {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  teacherId   Int
+  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  classes     Class[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Class {
+  id          Int          @id @default(autoincrement())
+  name        String
+  subjectId   Int
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  teacherId   Int
+  teacher     Teacher      @relation(fields: [teacherId], references: [id])
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Enrollment {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  student    Student  @relation(fields: [studentId], references: [id])
+  classId    Int
+  class      Class    @relation(fields: [classId], references: [id])
+  grade      Float?
+  attendance Int?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+// Mensalidade
+model Tuition {
+  id        Int      @id @default(autoincrement())
+  parentId  Int // Relacionamento com Parent
+  parent    Parent   @relation(fields: [parentId], references: [id])
+  amount    Float // Valor da mensalidade
+  dueDate   DateTime // Data de vencimento
+  paid      Boolean  @default(false) // Status de pagamento
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Roles {
+  ADMIN
+  COORDINATOR
+  TEACHER
+  STUDENT
+  PARENT
+}
