@@ -1,26 +1,47 @@
 import { inject, injectable } from "tsyringe";
-import { IStudentServices, IUserServices } from "../interfaces/Implements";
+import { ICryptoServices, IStudentServices, IUserServices } from "../interfaces/Implements";
 import { TOKENS } from "../Constants/tokensDI";
 import { StudentUser } from "../Types/user";
-import { NestedStudentData } from "../Types/nested_datas";
 import { Prisma, User } from "@prisma/client";
 import { Services } from ".";
+import { studentSchema } from "../Validators/studentValidator";
+import { BadRequestError } from "../Errors/ClientError";
+import { formatZodErrors } from "../Utils/utils";
 
 @injectable()
 class StudentServices extends Services<"student"> implements IStudentServices {
 
-    constructor(@inject(TOKENS.UserServices) private userServices: IUserServices) {
+    constructor(
+        @inject(TOKENS.UserServices) private userServices: IUserServices,
+        @inject(TOKENS.CryptoServices) private cryptoServices: ICryptoServices
+    ) {
         super("student");
-     }
+    }
 
     // Private Methods
-    private createAccessCode() {
-        return Math.floor(1000 + Math.random() * 9000).toString();
+    private async verifyAcessCode(code: string): Promise<string | undefined> {
+        const foundCode = await this.findUnique({ where: {accessCode: code}});
+        return foundCode?.accessCode;
+    }
+
+    private async validateAcessCode(code: string): Promise<void> {
+        const {error} = studentSchema.safeParse(code);
+        if(error) throw new BadRequestError(formatZodErrors(error));
+        const foundCode = await this.verifyAcessCode(code);
+        if(foundCode) {
+            throw new BadRequestError("Access code belongs to another student")
+        }
+    }
+
+    private async createAccessCode(): Promise<string> {
+        const accessCode = Math.floor(1000 + Math.random() * 9000).toString();
+        this.validateAcessCode(accessCode);
+        return await this.cryptoServices.hash(accessCode);
     }
 
     // Public Methods
     public async createStudent(student: Omit<StudentUser, "role">, parent_id: number, tx?: Prisma.TransactionClient): Promise<User> {
-        const accessCode = this.createAccessCode();
+        const accessCode = await this.createAccessCode();
 
         const newStudent: User = await this.userServices.createUser({
             name: student.name,
