@@ -1,0 +1,5 @@
+export * from "./AuthController"
+export * from "./UserController"
+export * from "./TeacherController"
+export * from "./ParentController"
+export * from "./StudentController"
