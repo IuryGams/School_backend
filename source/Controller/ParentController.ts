@@ -1,17 +1,16 @@
 import { inject, injectable } from "tsyringe";
-import { IParentController, IParentServices } from "../interfaces/Implements";
 import { TOKENS } from "../Constants/tokensDI";
-import ParentServices from "../Services/ParentServices";
 import { ParentWithStudents, ParentUser } from "../Types/user";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { IParentController, IParentServices } from "../implements";
 
 
 @injectable()
 class ParentController implements IParentController {
 
     constructor(
-        @inject(TOKENS.ParentServices) private parentServices: IParentServices
+        @inject(TOKENS.services.ParentServices) private parentServices: IParentServices
     ) {}
 
     async createParent(req: Request, res: Response, next: NextFunction): Promise<void> {

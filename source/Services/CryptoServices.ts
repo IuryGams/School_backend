@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { ICryptoServices } from "../interfaces/Implements";
+import { ICryptoServices } from "../implements/implements_services";
 import { injectable } from "tsyringe";
 
 @injectable()

@@ -1,15 +1,15 @@
 import { inject, injectable } from "tsyringe";
-import { IStudentController } from "../interfaces/Implements";
 import StudentServices from "../Services/StudentServices";
 import { TOKENS } from "../Constants/tokensDI";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import { StudentUser } from "../Types/user";
+import { IStudentController, IStudentServices } from "../implements";
 
 @injectable()
 class StudentController implements IStudentController {
 
-    constructor(@inject(TOKENS.StudentServices) private studentServices: StudentServices) { }
+    constructor(@inject(TOKENS.services.StudentServices) private studentServices: IStudentServices) { }
 
 
     async createStudent(req: Request, res: Response, next: NextFunction): Promise<void> {

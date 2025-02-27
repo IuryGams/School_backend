@@ -1,14 +1,14 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { IAuthController, IAuthServices } from "../interfaces/Implements";
 import { LoginRequest } from "../Types/auth";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
+import { IAuthController, IAuthServices } from "../implements";
 
 @injectable()
 class AuthController implements IAuthController {
 
-    constructor(@inject(TOKENS.AuthServices) private authServices: IAuthServices) { }
+    constructor(@inject(TOKENS.services.AuthServices) private authServices: IAuthServices) { }
 
     public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {

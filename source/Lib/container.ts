@@ -8,23 +8,33 @@ import TeacherServices from "../Services/TeacherServices";
 import ParentServices from "../Services/ParentServices";
 
 // Controllers
-import {UserController, AuthController, StudentController, ParentController} from "../Controller";
+import {UserController, AuthController, StudentController, ParentController, TeacherController} from "../Controller";
+import { EnrollmentServices } from "../Services/EnrollmentServices";
+import { SubjectServices } from "../Services/SubjectServices";
+import { TuitionServices } from "../Services/TuitionServices";
 
 // Registre as dependências no contêiner
 function configureContainerDI() {
     // Services
-    container.register(TOKENS.AuthServices, { useClass: AuthServices });
-    container.register(TOKENS.CryptoServices, { useClass: CryptoServices });
-    container.register(TOKENS.UserServices, { useClass: UserServices });
-    container.register(TOKENS.StudentServices, { useClass: StudentServices });
-    container.register(TOKENS.TeacherServices, { useClass: TeacherServices });
-    container.register(TOKENS.ParentServices, { useClass: ParentServices });
+    container.register(TOKENS.services.AuthServices, { useClass: AuthServices });
+    container.register(TOKENS.services.CryptoServices, { useClass: CryptoServices });
+    container.register(TOKENS.services.EnrollmentServices, { useClass: EnrollmentServices });
+    container.register(TOKENS.services.ParentServices, { useClass: ParentServices });
+    container.register(TOKENS.services.StudentServices, { useClass: StudentServices });
+    container.register(TOKENS.services.SubjectServices, { useClass: SubjectServices });
+    container.register(TOKENS.services.TeacherServices, { useClass: TeacherServices });
+    container.register(TOKENS.services.TuitionServices, { useClass: TuitionServices });
+    container.register(TOKENS.services.UserServices, { useClass: UserServices });
 
     // Controllers
-    container.register(TOKENS.UserController, { useClass: UserController }); // Adicione esta linha
-    container.register(TOKENS.AuthController, { useClass: AuthController }); // Adicione esta linha
-    container.register(TOKENS.StudentController, { useClass: StudentController }); // Adicione esta linha
-    container.register(TOKENS.ParentController, { useClass: ParentController }); // Adicione esta linha
+    container.register(TOKENS.controllers.AuthController, { useClass: AuthController });
+    // container.register(TOKENS.controllers.EnrollamentController, { useClass: EnrollamentController });
+    container.register(TOKENS.controllers.ParentController, { useClass: ParentController });
+    container.register(TOKENS.controllers.StudentController, { useClass: StudentController });
+    // container.register(TOKENS.controllers.SubjectController, { useClass: SubjectController });
+    container.register(TOKENS.controllers.TeacherController, { useClass: TeacherController });
+    // container.register(TOKENS.controllers.TuitionController, { useClass: TuitionController });
+    container.register(TOKENS.controllers.UserController, { useClass: UserController });
 
     // Adicione outras dependências aqui
 }
