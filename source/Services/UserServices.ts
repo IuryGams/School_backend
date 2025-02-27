@@ -116,11 +116,11 @@ class UserServices extends Services<"user"> implements IUserServices {
     /**
      * Busca um usuário pelo e-mail.
      * @param user_email - E-mail do usuário.
-     * @returns {Promise<BaseUser>} - Usuário encontrado.
+     * @returns {Promise<User>} - Usuário encontrado.
      * @throws {NotFoundError} - Se o usuário não for encontrado.
      */
-    public async getUserByEmail(user_email: string): Promise<BaseUser> {
-        return this.validateRecordExists(async () => await this.findUnique({
+    public async getUserByEmail(user_email: string): Promise<User> {
+        return await this.validateRecordExists(async () => await this.findUnique({
             where: {
                 email: user_email
             }

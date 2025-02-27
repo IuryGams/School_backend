@@ -10,7 +10,7 @@ interface IAuthServices {
 
 interface IUserServices {
   createUser<T extends UserType>(user: T, tx?: Prisma.TransactionClient): Promise<User>;
-  getUserByEmail(user_email: string): Promise<BaseUser>;
+  getUserByEmail(user_email: string): Promise<User>;
   getUserById(userId: number): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUser(userId: number, data: Partial<BaseUser>): Promise<User>;
@@ -30,6 +30,7 @@ interface IStudentServices {
   createStudent(student: Omit<StudentUser, "role">, parent_id: number, tx?: Prisma.TransactionClient): Promise<User>;
   createStudents(students: Omit<StudentUser, "role">[], parent_id: number, tx?: Prisma.TransactionClient): Promise<User[]>;
   getStudentById(studentId: number): Promise<Student>;
+  getStudentByAccessCode(accessCode: string): Promise<Student>;
   getAllStudents(): Promise<Student[]>;
   updateStudent(studentId: number, data: Partial<StudentUser>): Promise<User>;
   deleteStudent(studentId: number): Promise<void>;

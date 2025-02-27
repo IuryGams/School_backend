@@ -1,10 +1,10 @@
 import { User } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../Errors/ClientError";
-import { IAuthServices, ICryptoServices, IUserServices } from "../implements/implements_services";
+import { IAuthServices, ICryptoServices, IStudentServices, IUserServices } from "../implements/implements_services";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { LoginRequest, Token, UserResponse } from "../Types/auth";
+import { Credentials, LoginRequest, Token, UserResponse } from "../Types/auth";
 import { AuthSchema } from "../Validators/authValidator";
 import { formatZodErrors } from "../Utils/utils";
 
@@ -15,7 +15,8 @@ class AuthServices implements IAuthServices {
 
     constructor(
         @inject(TOKENS.services.UserServices) private userServices: IUserServices,
-        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices
+        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices,
+        @inject(TOKENS.services.StudentServices) private studentServices: IStudentServices
     ) { }
 
     private generateToken(user: User): string {
@@ -23,18 +24,12 @@ class AuthServices implements IAuthServices {
         return jwt.sign({ email, role, name }, this.JWT_SECRET, { expiresIn: 1209600 });
     }
 
-    private async validateUser(email: string): Promise<User> {
-        const foundUser = await this.userServices.getUserByEmail(email);
-        if (!foundUser) throw new NotFoundError("User does not exist");
-        return foundUser;
-    }
-
     private async validatePassword(password: string, hashedPassword: string): Promise<void> {
         const isPasswordValid = await this.cryptoServices.compare(password, hashedPassword);
         if (isPasswordValid) throw new UnauthorizedError("email or password is incorrect");
     }
 
-    private validateAuth(auth: LoginRequest): void {
+    private validateAuth(auth: Credentials): void {
         const { error } = AuthSchema.safeParse(auth);
         if (error) {
             throw new BadRequestError(formatZodErrors(error));
@@ -44,9 +39,10 @@ class AuthServices implements IAuthServices {
     // Public Methods
     public async login(auth: LoginRequest): Promise<Token> {
         this.validateAuth(auth);
-        const foundUser = await this.validateUser(auth.email);
+        const foundUser = await this.userServices.getUserByEmail(auth.email);
         await this.validatePassword(auth.password, foundUser.password);
         const accessToken = this.generateToken(foundUser);
+
         return {
             accessToken,
             user: {

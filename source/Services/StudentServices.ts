@@ -117,6 +117,21 @@ class StudentServices extends Services<"student"> implements IStudentServices {
     }
 
     /**
+     * Busca um estudante pelo accessCode.
+     * @param accessCode - Código de acesso do estudante.
+     * @returns {Promise<Student>} - Dados do estudante encontrado.
+     * @throws {NotFoundError} - Se o estudante não for encontrado.
+     */
+    public async getStudentByAccessCode(accessCode: string): Promise<Student> {
+        return await this.validateRecordExists(async () => await this.findUnique({
+            where: { accessCode },
+            include: { user: true },
+        }),
+            "Student not found"
+        );
+    }
+
+    /**
      * Retorna todos os estudantes cadastrados no sistema.
      * @returns {Promise<Student[]>} - Lista de estudantes.
      */

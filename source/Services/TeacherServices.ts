@@ -45,7 +45,7 @@ class TeacherServices extends Services<"teacher"> implements ITeacherServices {
      * @throws {NotFoundError} se o professor não existir
      */
     public async getTeacherById(teacherId: number): Promise<Teacher> {
-        return this.validateRecordExists(async () => await this.findUnique({
+        return await this.validateRecordExists(async () => await this.findUnique({
             where: { id: teacherId },
             include: { user: true },
         }),
