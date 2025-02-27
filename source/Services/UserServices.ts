@@ -5,8 +5,7 @@ import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
 import { formatZodErrors } from "../Utils/utils";
 import { BaseUser, UserType } from "../Types/user";
-import { User } from "@prisma/client";
-import { NestedUserData } from "../Types/nested_datas";
+import { Prisma, Roles, User } from "@prisma/client";
 import { Services } from ".";
 
 
@@ -22,17 +21,47 @@ class UserServices extends Services<"user"> implements IUserServices {
 
     // Private Methods
     public async findUser(email: string): Promise<BaseUser | null> {
-        const foundUser = await this.findUnique({where: {email}});
+        const foundUser = await this.findUnique({ where: { email } });
         return foundUser;
     }
 
     private async validateUser(user: BaseUser): Promise<void> {
-        const {error} = userSchema.safeParse(user);
-        if(error) {
+        const { error } = userSchema.safeParse(user);
+        if (error) {
             throw new BadRequestError(formatZodErrors(error));
         }
         const foundUser = await this.findUser(user.email);
         if (foundUser) throw new BadRequestError("User already exists");
+    }
+
+    private addRoleSpecificData<T extends UserType>(
+        user: T,
+        userData: Prisma.UserCreateInput
+    ): Prisma.UserCreateInput {
+        switch (user.role) {
+            case Roles.STUDENT:
+                if (user.student) {
+                    userData.student = { ...user.student };
+                }
+                break;
+
+            case Roles.TEACHER:
+                if (user.teacher) {
+                    userData.teacher = { ...user.teacher };
+                }
+                break;
+
+            case Roles.PARENT:
+                if (user.parent) {
+                    userData.parent = { ...user.parent };
+                }
+                break;
+
+            default:
+                throw new BadRequestError("Invalid user role");
+        }
+
+        return userData;
     }
 
     // Public Methods
@@ -42,20 +71,22 @@ class UserServices extends Services<"user"> implements IUserServices {
         return foundUser;
     }
 
-    public async createUser<T extends UserType>(user: T): Promise<User> {
+    public async createUser<T extends UserType>(user: T, tx?: Prisma.TransactionClient): Promise<User> {
         await this.validateUser(user);
 
         const hashedPassword = await this.cryptoServices.hash(user.password)
-        const newUser = this.create({ 
-            data: { 
-                ...user,
-                password: hashedPassword,
-            }
-        });
 
-        return newUser
+        const userData: Prisma.UserCreateInput = {
+            ...user,
+            password: hashedPassword,
+        };
+
+        this.addRoleSpecificData(user, userData);
+
+        const newUser: User = tx ? await tx.user.create({ data: userData }) : await this.create({ data: userData });
+
+        return newUser;
     }
-
 
 }
 

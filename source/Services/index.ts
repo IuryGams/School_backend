@@ -46,6 +46,9 @@ abstract class Services<Model extends keyof PrismaModels> {
   protected async create<Args extends Parameters<PrismaModels[Model]['create']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['create']>> {
     return (this.model.create as any)(args);
   }
+  protected async createMany<Args extends Parameters<PrismaModels[Model]['createMany']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['createMany']>> {
+    return (this.model.create as any)(args);
+  }
 
   protected async update<Args extends Parameters<PrismaModels[Model]['update']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['update']>> {
     return (this.model.update as any)(args);
@@ -55,8 +58,16 @@ abstract class Services<Model extends keyof PrismaModels> {
     return (this.model.delete as any)(args);
   }
 
-  protected async withTransactions<T>(callback: (model: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    return prisma.$transaction( async (ctx) => callback(ctx));
+  protected async createwithTransactions<T>(callback: (model: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+    return prisma.$transaction(async (ctx) => callback(ctx));
+  }
+
+  protected async createWithTransaction<Args extends Parameters<PrismaModels[Model]['create']>[0]>( args: Args, tx?: Prisma.TransactionClient): Promise<any> {
+    if(tx) {
+      return await (tx as any)[this.model].create(args);
+    } else {
+      return await this.create(args);
+    }
   }
 }
 

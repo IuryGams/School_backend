@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { LoginRequest, Token, UserResponse } from "../Types/auth";
 import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser, TeacherUser, UserType, BaseUser } from "../Types/user";
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 import { NestedUserData } from "../Types/nested_datas";
 
 // Controllers
@@ -31,17 +31,18 @@ export interface IAuthServices {
 }
 
 export interface IUserServices {
-  createUser<T extends UserType>(user: T): Promise<User>;
+  createUser<T extends UserType>(user: T, tx?: Prisma.TransactionClient): Promise<User>;
   getUserByEmail(email: string): Promise<BaseUser>;
 }
 
 export interface IParentServices {
-  createParent(parent: ParentUser): Promise<User>
+  createParent(parent: ParentUser, tx?: Prisma.TransactionClient): Promise<User>
   createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply>;
 }
 
 export interface IStudentServices {
-  createStudent(student: StudentUser, parent_id: number): Promise<User>
+  createStudent(student: StudentUser, parent_id: number, tx?: Prisma.TransactionClient): Promise<User>;
+  createStudents(students: Omit<StudentUser, "role">[], parent_id: number, tx?: Prisma.TransactionClient): Promise<User[]>;
 }
 
 export interface ITeacherServices {
