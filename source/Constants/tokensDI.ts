@@ -1,18 +1,30 @@
+
 export const TOKENS = {
 
     // Services
-    AuthServices: Symbol("AuthServices"),
-    CryptoServices: Symbol("CryptoServices"),
-    UserServices: Symbol("UserServices"),
-    TeacherServices: Symbol("TeacherServices"),
-    ParentServices: Symbol("ParentServices"),
-    StudentServices: Symbol("StudentServices"),
+    services: {
+        AuthServices: Symbol("AuthServices"),
+        CryptoServices: Symbol("CryptoServices"),
+        EnrollmentServices: Symbol("EnrollmentServices"),
+        ParentServices: Symbol("ParentServices"),
+        StudentServices: Symbol("StudentServices"),
+        SubjectServices: Symbol("SubjectServices"),
+        TeacherServices: Symbol("TeacherServices"),
+        TuitionServices: Symbol("TuitionServices"),
+        UserServices: Symbol("UserServices"),
+    },
 
     // Controllers
-    AuthController: Symbol("AuthController"),
-    UserController: Symbol("UserController"),
-    StudentController: Symbol("StudentController"),
-    ParentController: Symbol("ParentController"),
+    controllers: {
+        AuthController: Symbol("AuthController"),
+        EnrollamentController: Symbol("EnrollamentController"),
+        ParentController: Symbol("ParentController"),
+        StudentController: Symbol("StudentController"),
+        SubjectController: Symbol("SubjectController"),
+        TeacherController: Symbol("TeacherController"),
+        TuitionController: Symbol("TuitionController"),
+        UserController: Symbol("UserController"),
+    }
     
 } as const;
 

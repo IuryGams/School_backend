@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { BadRequestError, NotFoundError, UnauthorizedError } from "../Errors/ClientError";
-import { IAuthServices, ICryptoServices, IUserServices } from "../interfaces/Implements";
+import { IAuthServices, ICryptoServices, IUserServices } from "../implements/implements_services";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
 import { LoginRequest, Token, UserResponse } from "../Types/auth";
