@@ -8,7 +8,7 @@ import { Services } from ".";
 @injectable()
 class TeacherServices extends Services<"teacher"> implements ITeacherServices {
 
-    constructor(@inject(TOKENS.UserServices) private userServices: IUserServices) {
+    constructor(@inject(TOKENS.services.UserServices) private userServices: IUserServices) {
         super("teacher")
     }
 

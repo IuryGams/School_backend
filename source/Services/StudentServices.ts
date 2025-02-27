@@ -12,8 +12,8 @@ import { formatZodErrors } from "../Utils/utils";
 class StudentServices extends Services<"student"> implements IStudentServices {
 
     constructor(
-        @inject(TOKENS.UserServices) private userServices: IUserServices,
-        @inject(TOKENS.CryptoServices) private cryptoServices: ICryptoServices
+        @inject(TOKENS.services.UserServices) private userServices: IUserServices,
+        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices
     ) {
         super("student");
     }

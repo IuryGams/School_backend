@@ -14,8 +14,8 @@ class AuthServices implements IAuthServices {
     private readonly JWT_SECRET = process.env.JWT_SECRET as string;
 
     constructor(
-        @inject(TOKENS.UserServices) private userServices: IUserServices,
-        @inject(TOKENS.CryptoServices) private cryptoServices: ICryptoServices
+        @inject(TOKENS.services.UserServices) private userServices: IUserServices,
+        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices
     ) { }
 
     private generateToken(user: User): string {

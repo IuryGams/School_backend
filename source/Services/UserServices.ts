@@ -14,7 +14,7 @@ import { Services } from ".";
 class UserServices extends Services<"user"> implements IUserServices {
 
     constructor(
-        @inject(TOKENS.CryptoServices) private cryptoServices: ICryptoServices
+        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices
     ) {
         super("user");
     }

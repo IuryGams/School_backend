@@ -10,8 +10,8 @@ import { Services } from ".";
 class ParentServices extends Services<"parent"> implements IParentServices {
 
     constructor(
-        @inject(TOKENS.UserServices) private userServices: IUserServices,
-        @inject(TOKENS.StudentServices) private studentServices: IStudentServices
+        @inject(TOKENS.services.UserServices) private userServices: IUserServices,
+        @inject(TOKENS.services.StudentServices) private studentServices: IStudentServices
     ) {
         super("parent");
     }
