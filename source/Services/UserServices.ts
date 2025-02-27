@@ -156,7 +156,7 @@ class UserServices extends Services<"user"> implements IUserServices {
 
         this.addRoleSpecificData(user, userData);
 
-        const newUser: User = tx ? await tx.user.create({ data: userData }) : await this.create({ data: userData });
+        const newUser: User = await this.createWithTransaction({data: userData});
 
         return newUser;
     }

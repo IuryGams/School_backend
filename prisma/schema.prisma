@@ -97,6 +97,7 @@ model Class {
   updatedAt   DateTime     @updatedAt
 }
 
+// Matricula
 model Enrollment {
   id         Int      @id @default(autoincrement())
   studentId  Int
