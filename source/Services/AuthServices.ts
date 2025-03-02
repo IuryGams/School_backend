@@ -4,7 +4,7 @@ import { BadRequestError, NotFoundError, UnauthorizedError } from "../Errors/Cli
 import { IAuthServices, ICryptoServices, IStudentServices, IUserServices } from "../implements/implements_services";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { Credentials, LoginRequest, Token, UserResponse } from "../Types/auth";
+import { Credentials, Token, UserResponse } from "../Types/auth";
 import { AuthSchema } from "../Validators/authValidator";
 import { formatZodErrors } from "../Utils/utils";
 
@@ -29,6 +29,16 @@ class AuthServices implements IAuthServices {
         if (isPasswordValid) throw new UnauthorizedError("email or password is incorrect");
     }
 
+    private async validateAccessCode(accessCode: string): Promise<User> {
+        const student = await this.studentServices.getStudentByAccessCode(accessCode);
+
+        if (!student.isActive) {
+            throw new UnauthorizedError("Student account is inactive");
+        }
+
+        return student.user;
+    }
+
     private validateAuth(auth: Credentials): void {
         const { error } = AuthSchema.safeParse(auth);
         if (error) {
@@ -37,7 +47,14 @@ class AuthServices implements IAuthServices {
     }
 
     // Public Methods
-    public async login(auth: LoginRequest): Promise<Token> {
+    public async login(credentials: Credentials): Promise<Token> {
+        let user: User;
+
+        if(credentials.username && credentials.accessCode) {
+            user = await this.valida
+        }
+        
+
         this.validateAuth(auth);
         const foundUser = await this.userServices.getUserByEmail(auth.email);
         await this.validatePassword(auth.password, foundUser.password);

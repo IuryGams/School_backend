@@ -28,6 +28,7 @@ class TeacherServices extends Services<"teacher"> implements ITeacherServices {
             {
                 name: teacher.name,
                 email: teacher.email,
+                lastName: teacher.lastName,
                 password: teacher.password,
                 role: "TEACHER",
                 teacher: {
@@ -75,18 +76,6 @@ class TeacherServices extends Services<"teacher"> implements ITeacherServices {
     public async updateTeacher(teacherId: number, data: Partial<TeacherUser>): Promise<User> {
         const teacher = await this.getTeacherById(teacherId);
         return this.userServices.updateUser(teacher.userId, data);
-    }
-
-    /**
-     * Deleta um professor do sistema.
-     *
-     * @param teacherId - ID do professor a ser deletado
-     * @throws {NotFoundError} se o professor não existir
-     */
-    public async deleteTeacher(teacherId: number): Promise<void> {
-        const teacher = await this.getTeacherById(teacherId);
-        await this.delete({ where: { id: teacherId } });
-        await this.userServices.deleteUser(teacher.userId);
     }
 }
 

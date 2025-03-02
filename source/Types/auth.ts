@@ -8,9 +8,10 @@ export enum Roles {
     COORDINATOR = "COORDINATOR"
 }
 
-export interface LoginRequest {
-    email: string;
-    password: string;
+export interface Credentials {
+    email?: string;       // Opcional: usado para login tradicional
+    password?: string;    // Opcional: usado para login tradicional
+    accessCode?: string;  // Opcional: usado para login de estudante
 }
 
 export interface TokenParams {

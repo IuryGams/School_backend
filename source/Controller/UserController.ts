@@ -25,6 +25,16 @@ class UserController implements IUserController {
         }
     }
 
+    async deleteUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const {user_id} = req.params;
+            const response = await this.userServices.deleteUser(Number(user_id));
+            res.status(StatusCodes.OK).json(response);
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }
 
 

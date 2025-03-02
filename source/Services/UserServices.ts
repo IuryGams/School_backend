@@ -4,8 +4,8 @@ import { ICryptoServices, IUserServices } from "../implements/implements_service
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
 import { formatZodErrors } from "../Utils/utils";
-import { BaseUser, UserType } from "../Types/user";
-import { Prisma, Roles, User } from "@prisma/client";
+import { BaseUser, StudentUser, UserType, UserUpdateData } from "../Types/user";
+import { $Enums, Prisma, Roles, User } from "@prisma/client";
 import { Services } from ".";
 
 
@@ -36,16 +36,10 @@ class UserServices extends Services<"user"> implements IUserServices {
     /**
      * Verifica se o e-mail já está em uso.
      * @param email - E-mail a ser verificado.
-     * @param userId - ID do usuário atual (opcional, para evitar conflito com o próprio usuário).
      * @throws {BadRequestError} - Se o e-mail já estiver em uso.
      */
-    private async validateEmailUniqueness(email: string, userId?: number): Promise<void> {
-        const existingUser = await this.findFirst({
-            where: {
-                email,
-                NOT: { id: userId }, // Ignora o próprio usuário durante a atualização
-            },
-        });
+    private async validateEmailUniqueness(email: string): Promise<void> {
+        const existingUser = await this.findUnique({ where: { email } });
         if (existingUser) {
             throw new BadRequestError("Email already in use");
         }
@@ -58,43 +52,6 @@ class UserServices extends Services<"user"> implements IUserServices {
      */
     private async hashPassword(password: string): Promise<string> {
         return this.cryptoServices.hash(password);
-    }
-
-    /**
-     * Adiciona dados específicos de acordo com o papel (role) do usuário.
-     * @param user - Dados do usuário.
-     * @param userData - Objeto de criação do usuário no Prisma.
-     * @returns {Prisma.UserCreateInput} - Dados do usuário com informações específicas do papel.
-     * @throws {BadRequestError} - Se o papel for inválido.
-     */
-    private addRoleSpecificData<T extends UserType>(
-        user: T,
-        userData: Prisma.UserCreateInput
-    ): Prisma.UserCreateInput {
-        switch (user.role) {
-            case Roles.STUDENT:
-                if (user.student) {
-                    userData.student = { ...user.student };
-                }
-                break;
-
-            case Roles.TEACHER:
-                if (user.teacher) {
-                    userData.teacher = { ...user.teacher };
-                }
-                break;
-
-            case Roles.PARENT:
-                if (user.parent) {
-                    userData.parent = { ...user.parent };
-                }
-                break;
-
-            default:
-                throw new BadRequestError("Invalid user role");
-        }
-
-        return userData;
     }
 
     // Public Methods
@@ -142,21 +99,19 @@ class UserServices extends Services<"user"> implements IUserServices {
      * @returns {Promise<User>} - Usuário criado.
      * @throws {BadRequestError} - Se os dados forem inválidos ou o e-mail já estiver em uso.
      */
-    public async createUser<T extends UserType>(user: T, tx?: Prisma.TransactionClient): Promise<User> {
+    public async createUser(user: Prisma.UserCreateInput): Promise<User> {
 
         this.validateUserData(user);
         await this.validateEmailUniqueness(user.email);
 
         const hashedPassword = await this.hashPassword(user.password);
 
-        const userData: Prisma.UserCreateInput = {
-            ...user,
-            password: hashedPassword,
-        };
-
-        this.addRoleSpecificData(user, userData);
-
-        const newUser: User = await this.createWithTransaction({data: userData});
+        const newUser: User = await this.create({
+            data: {
+                ...user,
+                password: hashedPassword
+            }
+        });
 
         return newUser;
     }
@@ -164,22 +119,26 @@ class UserServices extends Services<"user"> implements IUserServices {
     /**
      * Atualiza os dados de um usuário.
      * @param userId - ID do usuário.
-     * @param data - Dados a serem atualizados.
+     * @param data: {BaseUser} - Dados a serem atualizados.
      * @returns {Promise<User>} - Usuário atualizado.
      * @throws {NotFoundError} - Se o usuário não for encontrado.
      */
-    public async updateUser(userId: number, data: Partial<BaseUser>): Promise<User> {
-        if (data.email) {
-            await this.validateEmailUniqueness(data.email, userId);
+    public async updateUser(userId: number, newData: Prisma.UserUpdateInput): Promise<User> {
+        if (newData.email) {
+            await this.validateEmailUniqueness(newData.email as string);
         }
 
-        if (data.password) {
-            data.password = await this.hashPassword(data.password);
+        if (newData.password) {
+            newData.password = await this.hashPassword(newData.password as string);
         }
+
+        await this.getUserById(userId);
 
         return this.update({
             where: { id: userId },
-            data,
+            data: {
+                ...newData
+            },
         });
     }
 

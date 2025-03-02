@@ -3,12 +3,13 @@ import { Request, Response, NextFunction } from "express";
 
 // Controllers
 interface IAuthController {
-  login(req: Request, res: Response, next: NextFunction): Promise<void>
-  getInformationUser(req: Request, res: Response, next: NextFunction): Promise<void>
+  login(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getInformationUser(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
 interface IUserController {
   createUser(req: Request, res: Response, next: NextFunction): Promise<void>;
+  deleteUser(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
 interface IParentController {
@@ -16,11 +17,11 @@ interface IParentController {
   createParentWithStudents(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 interface IStudentController {
-  createStudent(req: Request, res: Response, next: NextFunction): Promise<void>
+  createStudent(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
 interface ITeacherController {
-
+  createTeacher(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
 export  {

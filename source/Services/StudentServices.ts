@@ -19,13 +19,22 @@ class StudentServices extends Services<"student"> implements IStudentServices {
     }
 
     // Private Methods
+    private generateUsername(name: string, lastName: string): string {
+        return `${name.toLocaleLowerCase()}.${lastName.toLocaleLowerCase()}`.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
 
     /**
-     * Gera um código de acesso aleatório de 4 dígitos.
+     * Gera um código de acesso aleatório de 6 dígitos.
      * @returns {string} - Código de acesso gerado.
      */
-    private generateAccessCode(): string {
-        return Math.floor(1000 + Math.random() * 9000).toString();
+    private async generateAccessCode(code: string): Promise<string> {
+        let exists: boolean;
+        do {
+            code = Math.floor(100000 + Math.random() * 900000).toString();
+            console.log(code);
+            exists = await this.accessCodeExists(code);
+        } while (exists);
+        return code;
     }
 
     /**
@@ -53,13 +62,8 @@ class StudentServices extends Services<"student"> implements IStudentServices {
      * @throws {BadRequestError} - Se a validação do código falhar.
      */
     private async createUniqueAccessCode(): Promise<string> {
-        let accessCode: string;
-        do {
-            accessCode = this.generateAccessCode();
-            const { error } = studentSchema.safeParse(accessCode);
-            if (error) throw new BadRequestError(formatZodErrors(error));
-        } while (await this.accessCodeExists(accessCode));
-
+        let accessCode: string = "";
+        accessCode = await this.generateAccessCode(accessCode);
         return this.encryptAccessCode(accessCode);
     }
 
@@ -72,22 +76,24 @@ class StudentServices extends Services<"student"> implements IStudentServices {
      * @param tx - prisma.$transaction (opcional).
      * @returns {Promise<User>} - Usuário criado.
      */
-    public async createStudent(student: Omit<StudentUser, "role">, parent_id: number, tx?: Prisma.TransactionClient): Promise<User> {
+    public async createStudent(student: Omit<StudentUser, "role">, parent_id: number): Promise<User> {
         const accessCode = await this.createUniqueAccessCode();
-
+        const username = this.generateUsername(student.name, student.lastName);
         return await this.userServices.createUser({
             name: student.name,
             email: student.email,
+            lastName: student.lastName,
             password: student.password,
             role: "STUDENT",
             student: {
                 create: {
                     parentId: parent_id,
+                    isActive: true,
                     accessCode,
-                    isActive: true
+                    username,
                 }
             }
-        }, tx);
+        });
     }
 
     /**
@@ -97,8 +103,8 @@ class StudentServices extends Services<"student"> implements IStudentServices {
      * @param tx - prisma.$transaction (opcional).
      * @returns {Promise<User[]>} - Lista de usuários criados.
      */
-    public async createStudents(students: Omit<StudentUser, "role">[], parent_id: number, tx?: Prisma.TransactionClient): Promise<User[]> {
-        return Promise.all(students.map(async student => await this.createStudent(student, parent_id, tx)));
+    public async createStudents(students: Omit<StudentUser, "role">[], parent_id: number): Promise<User[]> {
+        return Promise.all(students.map(async student => await this.createStudent(student, parent_id)));
     }
 
     /**
@@ -108,6 +114,7 @@ class StudentServices extends Services<"student"> implements IStudentServices {
      * @throws {NotFoundError} - Se o estudante não for encontrado.
      */
     public async getStudentById(studentId: number): Promise<Student> {
+        console.log(studentId);
         return await this.validateRecordExists(async () => await this.findUnique({
             where: { id: studentId },
             include: { user: true },
@@ -152,16 +159,6 @@ class StudentServices extends Services<"student"> implements IStudentServices {
         return this.userServices.updateUser(student.userId, data);
     }
 
-    /**
-    * Exclui um estudante e seu respectivo usuário do sistema.
-    * @param studentId - ID do estudante a ser deletado.
-    * @returns {Promise<void>} - Confirmação da exclusão.
-    */
-    public async deleteStudent(studentId: number): Promise<void> {
-        const student = await this.getStudentById(studentId);
-        await this.delete({ where: { id: studentId } });
-        await this.userServices.deleteUser(student.userId);
-    }
 }
 
 export default StudentServices;

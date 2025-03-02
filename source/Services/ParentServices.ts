@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
 import { IParentServices, IStudentServices, IUserServices } from "../implements/implements_services";
-import { ParentWithStudents, ParentWithStudentsReply, ParentUser } from "../Types/user";
+import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser } from "../Types/user";
 import { Parent, Prisma, User } from "@prisma/client";
 import { Services } from ".";
 
@@ -30,17 +30,26 @@ class ParentServices extends Services<"parent"> implements IParentServices {
      * @returns {Promise<User>} - Usuário criado.
      * @throws {BadRequestError} - Se os dados forem inválidos ou o e-mail já estiver em uso.
      */
-    public async createParent(parent: ParentUser, tx?: Prisma.TransactionClient): Promise<User> {
+    public async createParent(parent: ParentUser, students?: StudentUser[]): Promise<User> {
 
         const newParent = await this.userServices.createUser({
             name: parent.name,
+            lastName: parent.lastName,
             email: parent.email,
             password: parent.password,
             role: "PARENT",
             parent: {
-                create: {}
+                create: {
+                    students: {
+                        createMany: {
+                            data: [
+                                ...students
+                            ]
+                        }
+                    }
+                }
             }
-        }, tx);
+        });
 
         return newParent;
     }
@@ -55,17 +64,8 @@ class ParentServices extends Services<"parent"> implements IParentServices {
     public async createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply> {
         const { parent, students } = parentStudent;
 
-        return this.createwithTransactions(async (tx) => {
-
-            const newParent: User = await this.createParent(parent, tx);
-
-            const createdStudents: User[] = await this.studentServices.createStudents(students, newParent.id, tx);
-
-            return {
-                parent: newParent,
-                students: createdStudents
-            }
-        })
+        const 
+        
     }
 
     /**

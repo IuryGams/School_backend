@@ -7,6 +7,12 @@ export const userSchema = z.object({
     }).min(3, {
         message: "must have at least 3 letters"
     }),
+    lastName: z.string({
+        required_error: "is required",
+        invalid_type_error: "must be a string"
+    }).min(3, {
+        message: "must have at least 3 letters"
+    }),
     email: z.string({
         required_error: "is required",
     }).email({

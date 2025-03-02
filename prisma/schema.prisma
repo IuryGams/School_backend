@@ -5,11 +5,13 @@ generator client {
 datasource db {
   provider = "postgresql" // ou "mysql", "sqlite", etc.
   url      = env("DATABASE_URL") // URL do banco de dados
+  directUrl = env("DIRECT_URL") 
 }
 
 model User {
   id        Int      @id @default(autoincrement())
   name      String
+  lastName  String
   email     String   @unique
   password  String
   role      Roles // "admin", "teacher", "student", "parent", "coordinator"
@@ -20,7 +22,7 @@ model User {
   teacher Teacher?
   student Student?
   parent  Parent?
-  address Address[]
+  address Address[] 
 }
 
 model Address {
@@ -38,23 +40,25 @@ model Address {
 
   // Relacionamentos (opcionais)
   userId Int? // Relacionamento com User (opcional)
-  user   User? @relation(fields: [userId], references: [id])
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Teacher {
   id        Int       @id @default(autoincrement())
   userId    Int       @unique
-  user      User      @relation(fields: [userId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjects  Subject[]
   classes   Class[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
+
 model Student {
   id          Int          @id @default(autoincrement())
   userId      Int          @unique
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username    String
   parentId    Int
   parent      Parent       @relation(fields: [parentId], references: [id])
   accessCode  String       @unique 
