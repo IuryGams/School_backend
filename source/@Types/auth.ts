@@ -8,9 +8,15 @@ export enum Roles {
     COORDINATOR = "COORDINATOR"
 }
 
-export interface LoginRequest {
-    email: string;
-    password: string;
+export interface Credentials {
+    email?: string;      
+    password?: string;   
+    accessCode?: string;
+}
+
+export interface Token {
+    accessToken: string;
+    user: UserResponse;
 }
 
 export interface TokenParams {
@@ -25,9 +31,4 @@ export interface UserResponse {
     name: string;
     email: string;
     role: Roles | $Enums.Roles;
-  }
-  
-  export interface Token {
-    accessToken: string;
-    user: UserResponse;
-  }
+}

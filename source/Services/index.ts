@@ -1,12 +1,13 @@
 
 
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
 import prisma from "../Lib/prisma";
 import { NotFoundError } from "../Errors/ClientError";
 
-type PrismaModels = {
+interface PrismaModels {
   user: Prisma.UserDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
+  address: Prisma.AddressDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   student: Prisma.StudentDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   teacher: Prisma.TeacherDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   parent: Prisma.ParentDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
@@ -59,18 +60,9 @@ abstract class Services<Model extends keyof PrismaModels> {
     return (this.model.delete as any)(args);
   }
 
-  protected async createwithTransactions<T>(callback: (model: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+  protected async queryWithTransactions<T>(callback: (model: Prisma.TransactionClient) => Promise<T>): Promise<T> {
     return prisma.$transaction(async (ctx) => callback(ctx));
   }
-
-  protected async createWithTransaction<Args extends Parameters<PrismaModels[Model]['create']>[0]>(args: Args, tx?: Prisma.TransactionClient): Promise<any> {
-    if (tx) {
-      return await (tx as any)[this.model].create(args);
-    } else {
-      return await this.create(args);
-    }
-  }
-
 
   /**
      * Método privado para validar a existência de um registro no banco de dados.

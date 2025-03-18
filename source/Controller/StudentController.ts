@@ -3,7 +3,7 @@ import StudentServices from "../Services/StudentServices";
 import { TOKENS } from "../Constants/tokensDI";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import { StudentUser } from "../Types/user";
+import { StudentUser } from "../@Types/user";
 import { IStudentController, IStudentServices } from "../implements";
 
 @injectable()

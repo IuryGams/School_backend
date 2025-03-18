@@ -1,9 +1,17 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { IParentServices, IStudentServices, IUserServices } from "../implements/implements_services";
-import { ParentWithStudents, ParentWithStudentsReply, ParentUser } from "../Types/user";
+import { ICryptoServices, IParentServices, IStudentServices, IUserServices } from "../implements/implements_services";
+import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser } from "../@Types/user";
 import { Parent, Prisma, User } from "@prisma/client";
 import { Services } from ".";
+import { NotFoundError } from "../Errors/ClientError";
+
+
+export interface ParentExtend extends User {
+    parent?: {
+        id: number
+    }
+}
 
 
 @injectable()
@@ -11,18 +19,12 @@ class ParentServices extends Services<"parent"> implements IParentServices {
 
     constructor(
         @inject(TOKENS.services.UserServices) private userServices: IUserServices,
-        @inject(TOKENS.services.StudentServices) private studentServices: IStudentServices
+        @inject(TOKENS.services.StudentServices) private studentServices: IStudentServices,
+        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices
     ) {
         super("parent");
     }
-
-
-    // Private Methods
-
-
-
     // Public Methods
-
     /**
      * Crie um novo Responsável/Pai.
      * @param parent - Dados do Responsável/Pai.
@@ -30,19 +32,17 @@ class ParentServices extends Services<"parent"> implements IParentServices {
      * @returns {Promise<User>} - Usuário criado.
      * @throws {BadRequestError} - Se os dados forem inválidos ou o e-mail já estiver em uso.
      */
-    public async createParent(parent: ParentUser, tx?: Prisma.TransactionClient): Promise<User> {
-
-        const newParent = await this.userServices.createUser({
+    public async createParent(parent: ParentUser, tx?: Prisma.UserDelegate): Promise<ParentExtend> {
+        return await this.userServices.createUser({
             name: parent.name,
+            lastName: parent.lastName,
             email: parent.email,
             password: parent.password,
             role: "PARENT",
             parent: {
                 create: {}
             }
-        }, tx);
-
-        return newParent;
+        }, {tx, parent: true}); 
     }
 
     /**
@@ -55,16 +55,20 @@ class ParentServices extends Services<"parent"> implements IParentServices {
     public async createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply> {
         const { parent, students } = parentStudent;
 
-        return this.createwithTransactions(async (tx) => {
+        return this.queryWithTransactions(async (tx) => {
 
-            const newParent: User = await this.createParent(parent, tx);
+            const createdUser = await this.createParent(parent, tx.user);
 
-            const createdStudents: User[] = await this.studentServices.createStudents(students, newParent.id, tx);
+            if(createdUser.parent) {
+                const createdStudents = await this.studentServices.createStudents(students, createdUser.parent.id, tx.user)
 
-            return {
-                parent: newParent,
-                students: createdStudents
+                return {
+                    parent: createdUser,
+                    students: createdStudents
+                }
             }
+
+            throw new NotFoundError("Parent not found")
         })
     }
 
