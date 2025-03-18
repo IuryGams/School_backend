@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { UnauthorizedError } from "../../Errors/ClientError";
 import jwt from "jsonwebtoken";
-import { TokenParams } from "../../Types/auth";
+import { TokenParams } from "../../@Types/auth";
 import { JsonWebTokenCustomError, TokenExpiredCustomError } from "../../Errors/Token";
 
 async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {

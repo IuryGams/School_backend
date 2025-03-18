@@ -5,7 +5,7 @@ import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
 import { StatusCodes } from "http-status-codes";
 import { IUserController, IUserServices } from "../implements";
-import { UserType } from "../Types/user";
+import { UserType } from "../@Types/user";
 
 
 @injectable()
@@ -17,7 +17,7 @@ class UserController implements IUserController {
 
     async createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const body: UserType = req.body;
+            const body = req.body;
             const response = await this.userServices.createUser(body);
             res.status(StatusCodes.OK).json(response);
         } catch (error) {

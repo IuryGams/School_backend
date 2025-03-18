@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { LoginRequest } from "../Types/auth";
+import { LoginRequest } from "../@Types/auth";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { IAuthController, IAuthServices } from "../implements";

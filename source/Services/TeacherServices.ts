@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
 import { ITeacherServices, IUserServices } from "../implements/implements_services";
-import { TeacherUser } from "../Types/user";
+import { TeacherUser } from "../@Types/user";
 import { Teacher, User } from "@prisma/client";
 import { Services } from ".";
 

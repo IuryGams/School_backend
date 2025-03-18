@@ -4,7 +4,7 @@ import { BadRequestError, NotFoundError, UnauthorizedError } from "../Errors/Cli
 import { IAuthServices, ICryptoServices, IStudentServices, IUserServices } from "../implements/implements_services";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { Credentials, Token, UserResponse } from "../Types/auth";
+import { Credentials, Token, UserResponse } from "../@Types/auth";
 import { AuthSchema } from "../Validators/authValidator";
 import { formatZodErrors } from "../Utils/utils";
 

@@ -1,6 +1,7 @@
-import { Credentials, Token, UserResponse } from "../Types/auth";
-import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser, TeacherUser, UserType, BaseUser } from "../Types/user";
+import { Credentials, Token, UserResponse } from "../@Types/auth";
+import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser, TeacherUser, UserType, BaseUser, BaseOptionsUser } from "../@Types/user";
 import { Parent, Prisma, Student, Teacher, User } from "@prisma/client";
+import { ParentExtend } from "../Services/ParentServices";
 
 // Services
 interface IAuthServices {
@@ -9,8 +10,8 @@ interface IAuthServices {
 }
 
 interface IUserServices {
-  createUser(user: Prisma.UserCreateInput): Promise<User>;
-  getUserByEmail(user_email: string): Promise<User>;
+  createUser(user: Prisma.UserCreateInput, options?: BaseOptionsUser): Promise<User | ParentExtend>;
+  getUserByEmail(user_email: string): Promise<User | null>;
   getUserById(userId: number): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUser(userId: number, data: Partial<BaseUser>): Promise<User>;
@@ -18,8 +19,8 @@ interface IUserServices {
 }
 
 interface IParentServices {
-  createParent(parent: ParentUser, tx?: Prisma.TransactionClient): Promise<User>;
-  createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply>;
+  createParent(parent: ParentUser, tx?: Prisma.UserDelegate): Promise<ParentExtend>;
+  // createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply>;
   getParentById(parentId: number, includeStudents: boolean): Promise<Parent>;
   getAllParents(includeStudents: boolean): Promise<Parent[]>;
   updateParent(parentId: number, dataUpdate: Partial<ParentUser>): Promise<User>;
@@ -27,8 +28,10 @@ interface IParentServices {
 }
 
 interface IStudentServices {
-  createStudent(student: Omit<StudentUser, "role">, parent_id: number, tx?: Prisma.TransactionClient): Promise<User>;
-  createStudents(students: Omit<StudentUser, "role">[], parent_id: number, tx?: Prisma.TransactionClient): Promise<User[]>;
+  generateUsername(name: string, lastName: string): string;
+  createUniqueAccessCode(): Promise<string>;
+  createStudent(student: Omit<StudentUser, "role">, parent_id: number, tx?: Prisma.UserDelegate): Promise<User>;
+  createStudents(students: Omit<StudentUser, "role">[], parent_id: number, tx?: Prisma.UserDelegate): Promise<User[]>;
   getStudentById(studentId: number): Promise<Student>;
   getStudentByAccessCode(accessCode: string): Promise<Student>;
   getAllStudents(): Promise<Student[]>;

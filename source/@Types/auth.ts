@@ -9,9 +9,14 @@ export enum Roles {
 }
 
 export interface Credentials {
-    email?: string;       // Opcional: usado para login tradicional
-    password?: string;    // Opcional: usado para login tradicional
-    accessCode?: string;  // Opcional: usado para login de estudante
+    email?: string;      
+    password?: string;   
+    accessCode?: string;
+}
+
+export interface Token {
+    accessToken: string;
+    user: UserResponse;
 }
 
 export interface TokenParams {
@@ -26,9 +31,4 @@ export interface UserResponse {
     name: string;
     email: string;
     role: Roles | $Enums.Roles;
-  }
-  
-  export interface Token {
-    accessToken: string;
-    user: UserResponse;
-  }
+}
