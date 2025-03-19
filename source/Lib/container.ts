@@ -1,17 +1,14 @@
 import { container } from "tsyringe";
 import { CryptoServices } from "../Services/CryptoServices";
-import UserServices from "../Services/UserServices";
 import { TOKENS } from "../Constants/tokensDI";
 import AuthServices from "../Services/AuthServices";
-import StudentServices from "../Services/StudentServices";
-import TeacherServices from "../Services/TeacherServices";
-import ParentServices from "../Services/ParentServices";
 
 // Controllers
 import {UserController, AuthController, StudentController, ParentController, TeacherController} from "../Controller";
 import { EnrollmentServices } from "../Services/EnrollmentServices";
 import { SubjectServices } from "../Services/SubjectServices";
 import { TuitionServices } from "../Services/TuitionServices";
+import { ParentServices, StudentServices, TeacherServices, UserServices } from "../Services/Users";
 
 // Registre as dependências no contêiner
 function configureContainerDI() {

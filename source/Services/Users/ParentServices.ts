@@ -1,17 +1,14 @@
 import { inject, injectable } from "tsyringe";
-import { TOKENS } from "../Constants/tokensDI";
-import { ICryptoServices, IParentServices, IStudentServices, IUserServices } from "../implements/implements_services";
-import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser } from "../@Types/user";
+import { TOKENS } from "../../Constants/tokensDI";
+import { IParentServices, IStudentServices, IUserServices } from "../../implements/implements_services";
+import { ParentWithStudents, ParentWithStudentsReply, ParentUser, ParentExtend
+ } from "../../@Types/user";
 import { Parent, Prisma, User } from "@prisma/client";
-import { Services } from ".";
-import { NotFoundError } from "../Errors/ClientError";
+import { Services } from "../";
+import { NotFoundError } from "../../Errors/ClientError";
 
 
-export interface ParentExtend extends User {
-    parent?: {
-        id: number
-    }
-}
+
 
 
 @injectable()
@@ -20,7 +17,6 @@ class ParentServices extends Services<"parent"> implements IParentServices {
     constructor(
         @inject(TOKENS.services.UserServices) private userServices: IUserServices,
         @inject(TOKENS.services.StudentServices) private studentServices: IStudentServices,
-        @inject(TOKENS.services.CryptoServices) private cryptoServices: ICryptoServices
     ) {
         super("parent");
     }
@@ -134,4 +130,4 @@ class ParentServices extends Services<"parent"> implements IParentServices {
 
 }
 
-export default ParentServices;
+export  {ParentServices};

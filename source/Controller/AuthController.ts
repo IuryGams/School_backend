@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../Constants/tokensDI";
-import { LoginRequest } from "../@Types/auth";
+import { Credentials } from "../@Types/auth";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { IAuthController, IAuthServices } from "../implements";
@@ -12,7 +12,7 @@ class AuthController implements IAuthController {
 
     public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { email, password }: LoginRequest = req.body;
+            const { email, password }: Credentials = req.body;
             const token = await this.authServices.login({ email, password });
             res.status(StatusCodes.OK).json(token);
         } catch (error) {

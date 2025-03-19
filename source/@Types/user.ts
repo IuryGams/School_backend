@@ -45,3 +45,9 @@ export interface ParentWithStudentsReply {
     parent:  User;
     students: User[]
 }
+
+export interface ParentExtend extends User {
+    parent?: {
+        id: number
+    }
+}

@@ -1,7 +1,6 @@
 import { Credentials, Token, UserResponse } from "../@Types/auth";
-import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser, TeacherUser, UserType, BaseUser, BaseOptionsUser } from "../@Types/user";
+import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser, TeacherUser, BaseUser, BaseOptionsUser, ParentExtend } from "../@Types/user";
 import { Parent, Prisma, Student, Teacher, User } from "@prisma/client";
-import { ParentExtend } from "../Services/ParentServices";
 
 // Services
 interface IAuthServices {
@@ -20,7 +19,7 @@ interface IUserServices {
 
 interface IParentServices {
   createParent(parent: ParentUser, tx?: Prisma.UserDelegate): Promise<ParentExtend>;
-  // createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply>;
+  createParentWithStudents(parentStudent: ParentWithStudents): Promise<ParentWithStudentsReply>;
   getParentById(parentId: number, includeStudents: boolean): Promise<Parent>;
   getAllParents(includeStudents: boolean): Promise<Parent[]>;
   updateParent(parentId: number, dataUpdate: Partial<ParentUser>): Promise<User>;

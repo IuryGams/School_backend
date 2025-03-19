@@ -1,5 +1,4 @@
 import { inject, injectable } from "tsyringe";
-import StudentServices from "../Services/StudentServices";
 import { TOKENS } from "../Constants/tokensDI";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";

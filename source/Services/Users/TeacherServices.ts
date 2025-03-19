@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
-import { TOKENS } from "../Constants/tokensDI";
-import { ITeacherServices, IUserServices } from "../implements/implements_services";
-import { TeacherUser } from "../@Types/user";
+import { TOKENS } from "../../Constants/tokensDI";
+import { ITeacherServices, IUserServices } from "../../implements/implements_services";
+import { TeacherUser } from "../../@Types/user";
 import { Teacher, User } from "@prisma/client";
-import { Services } from ".";
+import { Services } from "../";
 
 @injectable()
 class TeacherServices extends Services<"teacher"> implements ITeacherServices {
@@ -79,4 +79,4 @@ class TeacherServices extends Services<"teacher"> implements ITeacherServices {
     }
 }
 
-export default TeacherServices;
+export {TeacherServices};

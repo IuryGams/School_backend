@@ -1,12 +1,10 @@
 import { inject, injectable } from "tsyringe";
-import { ICryptoServices, IStudentServices, IUserServices } from "../implements/implements_services";
-import { TOKENS } from "../Constants/tokensDI";
-import { StudentUser } from "../@Types/user";
+import { ICryptoServices, IStudentServices, IUserServices } from "../../implements/implements_services";
+import { TOKENS } from "../../Constants/tokensDI";
+import { StudentUser } from "../../@Types/user";
 import { Prisma, Student, User } from "@prisma/client";
-import { Services } from ".";
-import { studentSchema } from "../Validators/studentValidator";
-import { BadRequestError } from "../Errors/ClientError";
-import { formatZodErrors } from "../Utils/utils";
+import { Services } from "../";
+import { BadRequestError } from "../../Errors/ClientError";
 
 @injectable()
 class StudentServices extends Services<"student"> implements IStudentServices {
@@ -171,4 +169,4 @@ class StudentServices extends Services<"student"> implements IStudentServices {
 
 }
 
-export default StudentServices;
+export {StudentServices};
