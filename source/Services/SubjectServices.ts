@@ -1,5 +1,5 @@
 import { Subject } from "@prisma/client";
-import { Services } from ".";
+import { Services } from "./BaseServices";
 import { NotFoundError } from "../Errors/ClientError";
 
 

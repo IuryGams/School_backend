@@ -1,4 +1,4 @@
-import { Services } from "."
+import { Services } from "./BaseServices"
 
 class ClassServices extends Services<"class"> {
     

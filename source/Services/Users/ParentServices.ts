@@ -4,7 +4,7 @@ import { IParentServices, IStudentServices, IUserServices } from "../../implemen
 import { ParentWithStudents, ParentWithStudentsReply, ParentUser, ParentExtend
  } from "../../@Types/user";
 import { Parent, Prisma, User } from "@prisma/client";
-import { Services } from "../";
+import { Services } from "../BaseServices";
 import { NotFoundError } from "../../Errors/ClientError";
 
 

@@ -6,7 +6,7 @@ import { TOKENS } from "../../Constants/tokensDI";
 import { formatZodErrors } from "../../Utils/utils";
 import { BaseOptionsUser, BaseUser, ParentExtend } from "../../@Types/user";
 import {  Prisma, User } from "@prisma/client";
-import { Services } from "../";
+import { Services } from "../BaseServices";
 
 
 

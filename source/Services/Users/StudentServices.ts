@@ -3,7 +3,7 @@ import { ICryptoServices, IStudentServices, IUserServices } from "../../implemen
 import { TOKENS } from "../../Constants/tokensDI";
 import { StudentUser } from "../../@Types/user";
 import { Prisma, Student, User } from "@prisma/client";
-import { Services } from "../";
+import { Services } from "../BaseServices";
 import { BadRequestError } from "../../Errors/ClientError";
 
 @injectable()

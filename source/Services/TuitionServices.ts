@@ -1,5 +1,5 @@
 import { PaymentDates, Tuition } from "@prisma/client";
-import { Services } from ".";
+import { Services } from "./BaseServices";
 import { NotFoundError } from "../Errors/ClientError";
 import { toZonedTime } from "date-fns-tz";
 import { addMonths, isPast, set } from "date-fns";
