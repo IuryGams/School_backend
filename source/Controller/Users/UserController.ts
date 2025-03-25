@@ -1,11 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import UserServices from "../Services/UserServices"
-import { User } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
-import { TOKENS } from "../Constants/tokensDI";
+import { TOKENS } from "../../Constants/tokensDI";
 import { StatusCodes } from "http-status-codes";
-import { IUserController, IUserServices } from "../implements";
-import { UserType } from "../@Types/user";
+import { IUserController, IUserServices } from "../../implements";
 
 
 @injectable()

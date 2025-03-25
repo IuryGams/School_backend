@@ -24,10 +24,17 @@ interface ITeacherController {
   createTeacher(req: Request, res: Response, next: NextFunction): Promise<void>;
 }
 
+interface ITuitionController {
+  createTuition(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getTuition(req: Request, res: Response, next: NextFunction): Promise<void>;
+  getAllTuitions(req: Request, res: Response, next: NextFunction): Promise<void>
+}
+
 export  {
     IAuthController,
     IUserController,
     IParentController,
     IStudentController,
-    ITeacherController
+    ITeacherController,
+    ITuitionController
 }

@@ -49,11 +49,14 @@ abstract class Services<Model extends keyof PrismaModels> {
     return (this.model.create as any)(args);
   }
   protected async createMany<Args extends Parameters<PrismaModels[Model]['createMany']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['createMany']>> {
-    return (this.model.create as any)(args);
+    return (this.model.createMany as any)(args);
   }
 
   protected async update<Args extends Parameters<PrismaModels[Model]['update']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['update']>> {
     return (this.model.update as any)(args);
+  }
+  protected async updateManyAndReturn<Args extends Parameters<PrismaModels[Model]['updateManyAndReturn']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['updateManyAndReturn']>> {
+    return (this.model.updateManyAndReturn as any)(args);
   }
 
   protected async delete<Args extends Parameters<PrismaModels[Model]['delete']>[0]>(args: Args): Promise<ReturnType<PrismaModels[Model]['delete']>> {

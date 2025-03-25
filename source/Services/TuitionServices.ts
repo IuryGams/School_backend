@@ -1,26 +1,131 @@
-import { PaymentDates, Tuition } from "@prisma/client";
+import { PaymentDates, PaymentStatus, Tuition } from "@prisma/client";
 import { Services } from "./BaseServices";
-import { NotFoundError } from "../Errors/ClientError";
-import { toZonedTime } from "date-fns-tz";
-import { addMonths, isPast, set } from "date-fns";
+import { BadRequestError, NotFoundError } from "../Errors/ClientError";
+import { ITuitionServices } from "../implements";
+import { injectable } from "tsyringe";
+import { tuitionSchema } from "../Validators/tuitionValidator";
+import { formatZodErrors } from "../Utils/utils";
+import { differenceInDays, isAfter } from "date-fns";
 
-const paymentDateMapping: Record<PaymentDates, number> = {
-    FIVE: 5,
-    TENTH: 10,
-    FIFTEENTH: 15,
-    TWENTIETH: 20,
-};
+interface ValidTuition {
+    amount: number;
+    dueDate: Date;
+    paymentStatus: PaymentStatus;
+    parentId: number;
+    paymentDate: PaymentDates;
+}
 
-class TuitionServices extends Services<"tuition"> {
+@injectable()
+class TuitionServices extends Services<"tuition"> implements ITuitionServices {
+    private mappingPaymentDates: Record<PaymentDates, number> = {
+        "FIVE": 5,
+        "TENTH": 10,
+        "FIFTEENTH": 15
+    }
+    private today: Date = new Date();
+    private month: number = this.today.getMonth();
+    private year: number = this.today.getFullYear();
+    private interestRate: number = 0.00066;
 
     constructor() {
         super("tuition")
     }
 
-
     // Private Methods
-    private calculateDueDate(dueDate?: PaymentDates): PaymentDates {
-        return dueDate ?? PaymentDates.TENTH;
+    private async calculateLatePayment(tuitions: Tuition[]): Promise<void> {
+        for(const tuition of tuitions) {
+            const dueDate = new Date(tuition.dueDate);
+            const daysLate = differenceInDays(this.today, dueDate);
+            const updatedAmount = tuition.amount * (1 + this.interestRate * daysLate);
+
+            await this.update({
+                where: { id: tuition.id },
+                data: {
+                    amount: updatedAmount
+                }
+            })
+
+            console.log(`💰 Mensalidade ${tuition.id} atualizada: R$ ${updatedAmount.toFixed(2)}`);
+        }
+   
+        console.log("✅ Atualização concluída.");
+    }
+
+
+    private validateTuition(tuition: ValidTuition): void {
+        const { error } = tuitionSchema.safeParse(tuition);
+        if (error) {
+            throw new BadRequestError(formatZodErrors(error));
+        }
+    }
+
+    private getDueDate(paymentDate: PaymentDates): number {
+        return this.mappingPaymentDates[paymentDate];
+    }
+
+    private calculateDueDate(paymentDate: PaymentDates): Date {
+        const nextMonth = this.month + 1;
+        const year = this.year;
+        const day = this.getDueDate(paymentDate);
+
+        return new Date(year, nextMonth, day);
+    }
+
+    public async updateLateFees(): Promise<Tuition[]> {
+        console.log("🔄 Iniciando atualização de mensalidades vencidas...");
+
+        const overudeTuitions = await this.findMany({
+            where: {
+                paymentStatus: PaymentStatus.PENDING,
+                dueDate: {
+                    lt: this.today
+                }
+            }
+        });
+
+        console.log(overudeTuitions);
+
+        if(overudeTuitions.length === 0) {
+            console.log("🔄 Não há mensalidades vencidas.");
+            return overudeTuitions;
+        }
+
+        await this.calculateLatePayment(overudeTuitions);
+
+        console.log(overudeTuitions);
+        return overudeTuitions;
+    }
+
+    private tenDaysBeforeDueDate(): void {
+        if(this.today < new Date(this.today.getDate() - 10)) {
+            throw new BadRequestError("O boleto só pode ser gerado 10 dias antes do vencimento.");
+        }
+    }
+
+    private async checkDuplicateTuition(parentId: number, paymentDate: PaymentDates): Promise<void> {
+        const dueDate = new Date(this.year, this.month + 1, this.getDueDate(paymentDate));
+        
+        const dueYear = dueDate.getFullYear();
+        const dueMonth = dueDate.getMonth();
+        
+        const firstDayOfDueMonth = new Date(dueYear, dueMonth, 1);
+        const lastDayOfDueMonth = new Date(dueYear, dueMonth + 1, 0);
+
+        const existingTuition = await this.findFirst({
+            where: {
+                parentId: parentId,
+                paymentStatus: PaymentStatus.PENDING,
+                dueDate: {
+                    gte: firstDayOfDueMonth,
+                    lte: lastDayOfDueMonth
+                }
+            }
+        });
+
+        if (existingTuition) {
+            const monthName = dueDate.toLocaleDateString("pt-BR", { month: "long" });
+            throw new BadRequestError(`Já existe um boleto para o mês de ${monthName}.`);
+        }
     }
 
     private async findTuition(tuitionId: number): Promise<Tuition> {
@@ -35,12 +140,21 @@ class TuitionServices extends Services<"tuition"> {
     }
 
     // Public Methods
-    public async createTuition(tuition: Omit<Tuition, "id" | "creadtedAt" | "updatedAt">) {
+    public async createTuition(tuition: Omit<Tuition, "id" | "createdAt" | "updatedAt">, parentId: number): Promise<Tuition> {
+
+        this.validateTuition({ ...tuition, parentId });
+        this.tenDaysBeforeDueDate();
+        await this.checkDuplicateTuition(tuition.parentId, tuition.paymentDate);
 
         const newTuition = await this.create({
             data: {
                 ...tuition,
-                dueDate: this.calculateDueDate(tuition.dueDate)
+                dueDate: new Date(2025, 1, 15), // this.calculateDueDate(tuition.paymentDate),
+                parentId
+            },
+            omit: {
+                createdAt: true,
+                updatedAt: true,
             }
         });
 
@@ -59,17 +173,26 @@ class TuitionServices extends Services<"tuition"> {
         return tuition;
     }
 
-    public async getAllTuition() {
+    public async getAllTuitions(): Promise<Tuition[]> {
         const tuitions = await this.findMany({
             include: {
-                parent: true
+                parent: {
+                    omit: {
+                        createdAt: true,
+                        updatedAt: true,
+                    }
+                }
+            },
+            omit: {
+                createdAt: true,
+                updatedAt: true,
             }
         });
 
         return tuitions;
     }
 
-    public async getTuitionByParentEmail(parentEmail: string) {
+    public async getTuitionsByParentEmail(parentEmail: string): Promise<Tuition[]> {
         const tuitionsParent = await this.findMany({
             where: {
                 parent: {
@@ -99,7 +222,7 @@ class TuitionServices extends Services<"tuition"> {
             data: {
                 amount: tuition.amount || foundTuition.amount,
                 dueDate: tuition.dueDate || foundTuition.dueDate,
-                paid: tuition.paid !== undefined ? tuition.paid : foundTuition.paid,
+                paymentStatus: tuition.paymentStatus !== undefined ? tuition.paymentStatus : foundTuition.paymentStatus,
             }
         });
 

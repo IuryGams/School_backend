@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe";
-import { ITeacherController, ITeacherServices } from "../implements";
-import { TOKENS } from "../Constants/tokensDI";
+import { ITeacherController, ITeacherServices } from "../../implements";
+import { TOKENS } from "../../Constants/tokensDI";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 

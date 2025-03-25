@@ -3,9 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // ou "mysql", "sqlite", etc.
-  url      = env("DATABASE_URL") // URL do banco de dados
-  directUrl = env("DIRECT_URL") 
+  provider  = "postgresql" // ou "mysql", "sqlite", etc.
+  url       = env("DATABASE_URL") // URL do banco de dados
+  // directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -22,7 +22,7 @@ model User {
   teacher Teacher?
   student Student?
   parent  Parent?
-  address Address[] 
+  address Address[]
 }
 
 model Address {
@@ -53,7 +53,6 @@ model Teacher {
   updatedAt DateTime  @updatedAt
 }
 
-
 model Student {
   id          Int          @id @default(autoincrement())
   userId      Int          @unique
@@ -61,7 +60,7 @@ model Student {
   username    String
   parentId    Int
   parent      Parent       @relation(fields: [parentId], references: [id])
-  accessCode  String       @unique 
+  accessCode  String       @unique
   enrollments Enrollment[]
   isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
@@ -116,14 +115,15 @@ model Enrollment {
 
 // Mensalidade
 model Tuition {
-  id        Int      @id @default(autoincrement())
-  parentId  Int // Relacionamento com Parent
-  parent    Parent   @relation(fields: [parentId], references: [id])
-  amount    Float // Valor da mensalidade
-  dueDate   PaymentDates @default(TENTH)
-  paid      Boolean  @default(false) // Status de pagamento
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int           @id @default(autoincrement())
+  parentId      Int // Relacionamento com Parent
+  parent        Parent        @relation(fields: [parentId], references: [id])
+  amount        Float // Valor da mensalidade
+  dueDate       DateTime // Data de vencimento
+  paymentDate   PaymentDates  @default(TENTH) // Dia de pagamento 
+  paymentStatus PaymentStatus @default(PENDING) // Status de pagamento
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 enum Roles {
@@ -134,9 +134,15 @@ enum Roles {
   PARENT
 }
 
+enum PaymentStatus {
+  PAID
+  PENDING
+  CANCELED
+  REFUNDED
+}
+
 enum PaymentDates {
   FIVE
   TENTH
   FIFTEENTH
-  TWENTIETH
 }

@@ -1,6 +1,6 @@
 import { Credentials, Token, UserResponse } from "../@Types/auth";
 import { ParentWithStudents, ParentWithStudentsReply, ParentUser, StudentUser, TeacherUser, BaseUser, BaseOptionsUser, ParentExtend } from "../@Types/user";
-import { Parent, Prisma, Student, Teacher, User } from "@prisma/client";
+import { Parent, Prisma, Student, Teacher, Tuition, User } from "@prisma/client";
 
 // Services
 interface IAuthServices {
@@ -51,6 +51,13 @@ interface ICryptoServices {
     compare(password: string, hashedPassword: string): Promise<boolean>;
 }
 
+interface ITuitionServices {
+    createTuition(tuition: Omit<Tuition, "id" | "createdAt" | "updatedAt">, parentId: number): Promise<Tuition>;
+    getAllTuitions(): Promise<Tuition[]>;
+    getTuitionsByParentEmail(parentEmail: string): Promise<Tuition[]>
+    updateLateFees(): Promise<Tuition[]>
+}
+
 
 export {
   IAuthServices,
@@ -59,6 +66,7 @@ export {
   IParentServices,
   IStudentServices,
   ITeacherServices,
+  ITuitionServices
 }
 
 

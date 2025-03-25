@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
-import { TOKENS } from "../Constants/tokensDI";
-import { ParentWithStudents, ParentUser } from "../@Types/user";
+import { TOKENS } from "../../Constants/tokensDI";
+import { ParentWithStudents, ParentUser } from "../../@Types/user";
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { IParentController, IParentServices } from "../implements";
+import { IParentController, IParentServices } from "../../implements";
 
 
 @injectable()

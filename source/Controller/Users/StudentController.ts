@@ -1,9 +1,9 @@
 import { inject, injectable } from "tsyringe";
-import { TOKENS } from "../Constants/tokensDI";
+import { TOKENS } from "../../Constants/tokensDI";
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import { StudentUser } from "../@Types/user";
-import { IStudentController, IStudentServices } from "../implements";
+import { StudentUser } from "../../@Types/user";
+import { IStudentController, IStudentServices } from "../../implements";
 
 @injectable()
 class StudentController implements IStudentController {
