@@ -8,7 +8,8 @@ import {UserController, AuthController, StudentController, ParentController, Tea
 import { EnrollmentServices } from "../Services/EnrollmentServices";
 import { SubjectServices } from "../Services/SubjectServices";
 import { TuitionServices } from "../Services/TuitionServices";
-import { ParentServices, StudentServices, TeacherServices, UserServices } from "../Services/Users";
+import { CoordinatorServices, ParentServices, StudentServices, TeacherServices, UserServices } from "../Services/Users";
+import { ClassServices } from "../Services/ClassServices";
 
 // Registre as dependências no contêiner
 function configureContainerDI() {
@@ -17,6 +18,8 @@ function configureContainerDI() {
     // Services
     container.register(services.AuthServices, { useClass: AuthServices });
     container.register(services.CryptoServices, { useClass: CryptoServices });
+    container.register(services.CoordinatorServices, { useClass: CoordinatorServices });
+    container.register(services.ClassServices, { useClass: ClassServices });
     container.register(services.EnrollmentServices, { useClass: EnrollmentServices });
     container.register(services.ParentServices, { useClass: ParentServices });
     container.register(services.StudentServices, { useClass: StudentServices });

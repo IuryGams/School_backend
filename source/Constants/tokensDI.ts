@@ -5,6 +5,8 @@ export const TOKENS = {
     services: {
         AuthServices: Symbol("AuthServices"),
         CryptoServices: Symbol("CryptoServices"),
+        ClassServices: Symbol("ClassServices"),
+        CoordinatorServices: Symbol("CoordinatorServices"),
         EnrollmentServices: Symbol("EnrollmentServices"),
         ParentServices: Symbol("ParentServices"),
         StudentServices: Symbol("StudentServices"),
@@ -17,6 +19,7 @@ export const TOKENS = {
     // Controllers
     controllers: {
         AuthController: Symbol("AuthController"),
+        CoordinatorController: Symbol("CoordinatorController"),
         EnrollamentController: Symbol("EnrollamentController"),
         ParentController: Symbol("ParentController"),
         StudentController: Symbol("StudentController"),

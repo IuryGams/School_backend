@@ -12,7 +12,7 @@ import { NotFoundError } from "../../Errors/ClientError";
 
 
 @injectable()
-class ParentServices extends Services<"parent"> implements IParentServices {
+export class ParentServices extends Services<"parent"> implements IParentServices {
 
     constructor(
         @inject(TOKENS.services.UserServices) private userServices: IUserServices,
@@ -124,10 +124,7 @@ class ParentServices extends Services<"parent"> implements IParentServices {
      */
     public async deleteParent(parentId: number): Promise<void> {
         const parent = await this.getParentById(parentId);
-        await this.delete({ where: { id: parentId } });
         await this.userServices.deleteUser(parent.userId);
     }
 
 }
-
-export  {ParentServices};

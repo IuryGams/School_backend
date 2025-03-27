@@ -100,8 +100,6 @@ class UserServices extends Services<"user"> implements IUserServices {
      * @throws {BadRequestError} - Se os dados forem inválidos ou o e-mail já estiver em uso.
      */
     public async createUser(user: Prisma.UserCreateInput, options?: BaseOptionsUser): Promise<User | ParentExtend> {
-
-
         this.validateUserData(user);
         this.validateEmailUniqueness(user.email);
 
@@ -109,7 +107,7 @@ class UserServices extends Services<"user"> implements IUserServices {
 
         const client = options?.tx ?? this.model;
 
-        const newUser = await client.create({
+        return await client.create({
             data: {
                 ...user,
                 password: hashedPassword,
@@ -118,12 +116,9 @@ class UserServices extends Services<"user"> implements IUserServices {
                 parent: options?.parent,
                 student: options?.student,
                 teacher: options?.teacher,
+                coordinator: options?.coordinator,
             }
-            
         });
-
-
-        return newUser
     }
 
     /**
@@ -157,7 +152,6 @@ class UserServices extends Services<"user"> implements IUserServices {
      * @throws {NotFoundError} - Se o usuário não for encontrado.
      */
     public async deleteUser(userId: number): Promise<void> {
-        await this.getUserById(userId);
         await this.delete({
             where: { id: userId },
         });

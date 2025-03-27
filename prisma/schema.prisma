@@ -5,7 +5,7 @@ generator client {
 datasource db {
   provider  = "postgresql" // ou "mysql", "sqlite", etc.
   url       = env("DATABASE_URL") // URL do banco de dados
-  // directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -19,10 +19,11 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relacionamentos
-  teacher Teacher?
-  student Student?
-  parent  Parent?
-  address Address[]
+  teacher     Teacher?
+  student     Student?
+  parent      Parent?
+  coordinator Coordinator?
+  address     Address[]
 }
 
 model Address {
@@ -49,8 +50,17 @@ model Teacher {
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjects  Subject[]
   classes   Class[]
+  schedules Schedule[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model Coordinator {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Student {
@@ -77,15 +87,39 @@ model Parent {
   updatedAt DateTime  @updatedAt
 }
 
+model Schedule {
+  id        Int     @id @default(autoincrement())
+  classId   Int
+  class     Class   @relation(fields: [classId], references: [id])
+  teacherId Int
+  teacher   Teacher @relation(fields: [teacherId], references: [id])
+  subjectId Int
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  dayOfWeek       DayOfWeek // Enum para definir o dia da semana
+  startTime       DateTime  @db.Time() // Horário de início da aula
+  endTime         DateTime  @db.Time() // Horário de término da aula
+  durationMinutes Int       @default(50) // Duração da aula em minutos
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Subject {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  teacherId   Int
-  teacher     Teacher  @relation(fields: [teacherId], references: [id])
-  classes     Class[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int            @id @default(autoincrement())
+  name        String         @unique // Nome da matéria (ex: Matemática, Português)
+  code        String         @unique // Código da disciplina (ex: MAT101)
+  description String? // Breve descrição da matéria
+  level       EducationLevel // Ensino Fundamental 1, 2, Médio...
+
+  teacherId Int?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id]) // Quem ministra essa matéria
+
+  classes   Class[]
+  schedules Schedule[] // Aulas dessa matéria
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Class {
@@ -96,6 +130,7 @@ model Class {
   teacherId   Int
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
   enrollments Enrollment[]
+  schedules   Schedule[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -145,4 +180,20 @@ enum PaymentDates {
   FIVE
   TENTH
   FIFTEENTH
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum EducationLevel {
+  FUNDAMENTAL_I
+  FUNDAMENTAL_II
+  HIGH_SCHOOL
 }

@@ -10,6 +10,7 @@ interface PrismaModels {
   address: Prisma.AddressDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   student: Prisma.StudentDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   teacher: Prisma.TeacherDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
+  coordinator: Prisma.CoordinatorDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   parent: Prisma.ParentDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   subject: Prisma.SubjectDelegate<DefaultArgs, Prisma.PrismaClientOptions>;
   class: Prisma.ClassDelegate<DefaultArgs, Prisma.PrismaClientOptions>;

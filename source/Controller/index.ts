@@ -1,6 +1,7 @@
 export * from "./AuthController"
 export * from "./TuitionController"
 export * from "./Users/UserController"
+export * from "./Users/CoordinatorController"
 export * from "./Users/TeacherController"
 export * from "./Users/ParentController"
 export * from "./Users/StudentController"

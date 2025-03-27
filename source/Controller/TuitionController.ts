@@ -36,15 +36,6 @@ class TuitionController implements ITuitionController {
             next(error);
         }
     }
-
-    public async getTuitionTeste(req: Request, res: Response, next: NextFunction): Promise<void> {
-        try {
-            const response = await this.tuitionServices.updateLateFees();
-            res.status(StatusCodes.OK).json(response);
-        } catch (error) {
-            next(error);
-        }
-    }
 }
 
 export { TuitionController}

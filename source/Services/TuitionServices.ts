@@ -17,15 +17,15 @@ interface ValidTuition {
 
 @injectable()
 class TuitionServices extends Services<"tuition"> implements ITuitionServices {
-    private mappingPaymentDates: Record<PaymentDates, number> = {
+    private readonly mappingPaymentDates: Record<PaymentDates, number> = {
         "FIVE": 5,
         "TENTH": 10,
         "FIFTEENTH": 15
     }
-    private today: Date = new Date();
-    private month: number = this.today.getMonth();
-    private year: number = this.today.getFullYear();
-    private interestRate: number = 0.00066;
+    private readonly today: Date = new Date();
+    private readonly month: number = this.today.getMonth();
+    private readonly year: number = this.today.getFullYear();
+    private readonly interestRate: number = 0.00066;
 
     constructor() {
         super("tuition")
@@ -33,7 +33,7 @@ class TuitionServices extends Services<"tuition"> implements ITuitionServices {
 
     // Private Methods
     private async calculateLatePayment(tuitions: Tuition[]): Promise<void> {
-        for(const tuition of tuitions) {
+        for (const tuition of tuitions) {
             const dueDate = new Date(tuition.dueDate);
             const daysLate = differenceInDays(this.today, dueDate);
             const updatedAmount = tuition.amount * (1 + this.interestRate * daysLate);
@@ -47,7 +47,7 @@ class TuitionServices extends Services<"tuition"> implements ITuitionServices {
 
             console.log(`💰 Mensalidade ${tuition.id} atualizada: R$ ${updatedAmount.toFixed(2)}`);
         }
-   
+
         console.log("✅ Atualização concluída.");
     }
 
@@ -64,11 +64,8 @@ class TuitionServices extends Services<"tuition"> implements ITuitionServices {
     }
 
     private calculateDueDate(paymentDate: PaymentDates): Date {
-        const nextMonth = this.month + 1;
-        const year = this.year;
         const day = this.getDueDate(paymentDate);
-
-        return new Date(year, nextMonth, day);
+        return new Date(this.year, this.month + 1, day);
     }
 
     public async updateLateFees(): Promise<Tuition[]> {
@@ -83,37 +80,34 @@ class TuitionServices extends Services<"tuition"> implements ITuitionServices {
             }
         });
 
-        console.log(overudeTuitions);
-
-        if(overudeTuitions.length === 0) {
+        if (overudeTuitions.length === 0) {
             console.log("🔄 Não há mensalidades vencidas.");
             return overudeTuitions;
-        }
+        };
 
         await this.calculateLatePayment(overudeTuitions);
 
-        console.log(overudeTuitions);
         return overudeTuitions;
     }
 
     private tenDaysBeforeDueDate(): void {
-        if(this.today < new Date(this.today.getDate() - 10)) {
+        if (this.today < new Date(this.today.getDate() - 10)) {
             throw new BadRequestError("O boleto só pode ser gerado 10 dias antes do vencimento.");
         }
     }
 
     private async checkDuplicateTuition(parentId: number, paymentDate: PaymentDates): Promise<void> {
         const dueDate = new Date(this.year, this.month + 1, this.getDueDate(paymentDate));
-        
+
         const dueYear = dueDate.getFullYear();
         const dueMonth = dueDate.getMonth();
-        
+
         const firstDayOfDueMonth = new Date(dueYear, dueMonth, 1);
-        const lastDayOfDueMonth = new Date(dueYear, dueMonth + 1, 0);
+        const lastDayOfDueMonth = new Date(dueYear, dueMonth + 1, 0); 
 
         const existingTuition = await this.findFirst({
             where: {
-                parentId: parentId,
+                parentId,
                 paymentStatus: PaymentStatus.PENDING,
                 dueDate: {
                     gte: firstDayOfDueMonth,
@@ -146,10 +140,10 @@ class TuitionServices extends Services<"tuition"> implements ITuitionServices {
         this.tenDaysBeforeDueDate();
         await this.checkDuplicateTuition(tuition.parentId, tuition.paymentDate);
 
-        const newTuition = await this.create({
+        return await this.create({
             data: {
                 ...tuition,
-                dueDate: new Date(2025, 1, 15), // this.calculateDueDate(tuition.paymentDate),
+                dueDate: this.calculateDueDate(tuition.paymentDate),
                 parentId
             },
             omit: {
@@ -157,8 +151,6 @@ class TuitionServices extends Services<"tuition"> implements ITuitionServices {
                 updatedAt: true,
             }
         });
-
-        return newTuition;
     }
 
     public async getTuitionById(tuitionId: number) {
