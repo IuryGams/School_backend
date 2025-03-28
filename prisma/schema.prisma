@@ -45,14 +45,14 @@ model Address {
 }
 
 model Teacher {
-  id        Int       @id @default(autoincrement())
-  userId    Int       @unique
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   subjects  Subject[]
   classes   Class[]
   schedules Schedule[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Coordinator {
@@ -124,15 +124,19 @@ model Subject {
 
 model Class {
   id          Int          @id @default(autoincrement())
-  name        String
+  grade       Int
+  section     String       @db.Char(1) // Seção (A, B, C...)  
   subjectId   Int
   subject     Subject      @relation(fields: [subjectId], references: [id])
   teacherId   Int
   teacher     Teacher      @relation(fields: [teacherId], references: [id])
   enrollments Enrollment[]
   schedules   Schedule[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([grade, section]) // Garante que não haja duplicatas de turma
 }
 
 // Matricula
