@@ -1,8 +1,11 @@
 import { Class } from "@prisma/client";
 import { Services } from "./BaseServices"
+import { classSchema } from "../Validators/classValidator";
+import { BadRequestError } from "../Errors/ClientError";
+import { formatZodErrors } from "../Utils/utils";
 
 export interface IClassServices {
-    createClass(name: string, subjectId: number, teacherId: number): Promise<Class>
+    createClass(classData: Class): Promise<Class>;
     getClassByID(classId: number): Promise<Class>;
     getAllClasses(): Promise<Class[]>;
     updateClassInfor(classId: number, data: Partial<Class>): Promise<Class>;
@@ -11,22 +14,56 @@ export interface IClassServices {
 
 export class ClassServices extends Services<"class"> implements IClassServices {
 
+    constructor() {
+        super("class")
+    }
 
     // Private Methods
+    private validateClassData(classData: Class) {
+        const { error } = classSchema.safeParse(classData);
+        if (error) {
+            throw new BadRequestError(formatZodErrors(error));
+        }
 
+        if(classData.grade < 1 || classData.grade > 9) {
+            throw new BadRequestError("Grade must be between 1 and 9");
+        }
 
+        if(!/^[A-Z]$/.test(classData.section)) {
+            throw new BadRequestError("Section must be a single uppercase letter (Ex: A, B, C).");
+        }
+    };
 
-    // Public Methods
-    public async createClass(name: string, subjectId: number, teacherId: number) {
-        const newClass = await this.create({
-            data: {
-                name,
-                teacherId,
-                subjectId
+    private async UniqueClass(classData: Class): Promise<void> {
+        const foundClass = await this.findFirst({
+            where: {
+                grade: classData.grade,
+                section: classData.section,
             }
         });
 
-        return newClass;
+        if(foundClass) {
+            throw new BadRequestError(`The class ${foundClass.grade}° year ${foundClass.section} already exists`);
+        };
+    }
+
+    // Public Methods
+    public async createClass(classData: Class): Promise<Class> {
+        this.validateClassData(classData);
+        await this.UniqueClass(classData);
+
+        return await this.create({
+            data: {
+                grade: classData.grade,
+                section: classData.section,
+                subjectId: classData.subjectId,
+                teacherId: classData.teacherId,
+            },
+            omit: {
+                createdAt: true,
+                updatedAt: true
+            }
+        })
     }
 
     public async getClassByID(classId: number): Promise<Class> {
