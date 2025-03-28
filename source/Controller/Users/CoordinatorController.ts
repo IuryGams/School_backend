@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { TOKENS } from "../../Constants/tokensDI";
-import { ICoordinatorServices } from "../../Services/Users";
+import { ICoordinatorServices } from "../../Services/Users/@index";
 import { StatusCodes } from "http-status-codes";
 import { IClassServices } from "../../Services/ClassServices";
 

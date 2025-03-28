@@ -8,7 +8,7 @@ import {UserController, AuthController, StudentController, ParentController, Tea
 import { EnrollmentServices } from "../Services/EnrollmentServices";
 import { SubjectServices } from "../Services/SubjectServices";
 import { TuitionServices } from "../Services/TuitionServices";
-import { CoordinatorServices, ParentServices, StudentServices, TeacherServices, UserServices } from "../Services/Users";
+import { CoordinatorServices, ParentServices, StudentServices, TeacherServices, UserServices } from "../Services/Users/@index";
 import { ClassServices } from "../Services/ClassServices";
 
 // Registre as dependências no contêiner

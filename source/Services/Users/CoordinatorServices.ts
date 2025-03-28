@@ -9,10 +9,11 @@ export interface ICoordinatorServices {
     createCoordinator(coordinator: User): Promise<User>;
     updateCoordinator(coordinatorId: number, data: Partial<User>): Promise<User>;
     deleteCoordinator(coordinatorId: number): Promise<void>;
-    getCoordinatorById(coordinatorId: number): Promise<Coordinator>;
-    assignTeacherToClass(classId: number, coordinatorId: number, teacherId: number): Promise<Class>;
-}
 
+    assignTeacherToClass(classId: number, coordinatorId: number, teacherId: number): Promise<Class>;
+    createClassWithTeacher(classData: Class): Promise<Class>;
+    getAllClasses(): Promise<Class[]>;
+}
 
 @injectable()
 export class CoordinatorServices extends Services<"coordinator"> implements ICoordinatorServices {
@@ -26,7 +27,14 @@ export class CoordinatorServices extends Services<"coordinator"> implements ICoo
     }
 
     // Private Methods
-
+    private async getCoordinatorById(coordinatorId: number): Promise<Coordinator> {
+        return await this.validateRecordExists(async () => await this.findUnique({
+            where: { id: coordinatorId },
+            include: { user: true },
+        }),
+            "Coordinator not found"
+        );
+    }
 
     // Public Methods
     public async createCoordinator(coordinator: User): Promise<User> {
@@ -42,26 +50,6 @@ export class CoordinatorServices extends Services<"coordinator"> implements ICoo
         })
     };
 
-
-    public async getCoordinatorById(coordinatorId: number): Promise<Coordinator> {
-        return await this.validateRecordExists(async () => await this.findUnique({
-            where: { id: coordinatorId },
-            include: { user: true },
-        }),
-            "Coordinator not found"
-        );
-    }
-
-    public async assignTeacherToClass(classId: number, coordinatorId: number, teacherId: number): Promise<Class> {
-        await this.getCoordinatorById(coordinatorId);
-
-        await this.teacherServices.getTeacherById(teacherId);
-
-        return await this.classServices.updateClassInfor(classId, {
-            teacherId,
-        });
-    }
-
     public async updateCoordinator(coordinatorId: number, data: Partial<User>): Promise<User> {
         const foundCoordinator = await this.getCoordinatorById(coordinatorId);
         return await this.userServices.updateUser(foundCoordinator.userId, data);
@@ -73,5 +61,23 @@ export class CoordinatorServices extends Services<"coordinator"> implements ICoo
     }
 
 
+    // Classes Methods
+    public async assignTeacherToClass(classId: number, coordinatorId: number, teacherId: number): Promise<Class> {
+        await this.getCoordinatorById(coordinatorId);
+        await this.teacherServices.getTeacherById(teacherId);
+
+        return await this.classServices.updateClassInfor(classId, {
+            teacherId,
+        });
+    }
+
+    public async createClassWithTeacher(classData: Class): Promise<Class> {
+        const newClass = await this.classServices.createClass(classData);
+        return newClass;
+    }
+
+    public async getAllClasses(): Promise<Class[]> {
+        return await this.classServices.getAllClasses();
+    }
 
 }
